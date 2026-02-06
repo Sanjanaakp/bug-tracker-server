@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+
 const ticketSchema = new mongoose.Schema(
   {
     title: {
@@ -11,8 +12,8 @@ const ticketSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['To Do', 'In Progress', 'Done'],
-      default: 'To Do'
+      enum: ['Todo', 'In Progress', 'Done'],
+      default: 'Todo'
     },
     priority: {
       type: String,

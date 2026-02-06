@@ -1,21 +1,23 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
+const { protect } = require("../middleware/authMiddleware");
 
-const { protect } = require('../middleware/authMiddleware');
 const {
   createTicket,
   getTicketsByProject,
+  getSingleTicket,
+  getMyTickets,
   updateTicketStatus,
-  assignTicket,
   updateTicket,
   deleteTicket
-} = require('../controllers/ticketController');
+} = require("../controllers/ticketController");
 
-router.post('/', protect, createTicket);
-router.get('/:projectId', protect, getTicketsByProject);
-router.put('/:id/status', protect, updateTicketStatus);
-router.put('/:id/assign', protect, assignTicket);
-router.put('/:id', protect, updateTicket);
-router.delete('/:id', protect, deleteTicket);
+router.post("/", protect, createTicket);
+router.get("/project/:projectId", protect, getTicketsByProject);
+router.get("/my", protect, getMyTickets);
+router.put("/:id/status", protect, updateTicketStatus);
+router.put("/:id", protect, updateTicket);
+router.delete("/:id", protect, deleteTicket);
+router.get("/:id", protect, getSingleTicket);
 
 module.exports = router;
