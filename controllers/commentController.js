@@ -1,7 +1,7 @@
 const Comment = require("../models/Comment");
 const Ticket = require("../models/Ticket");
 
-// CREATE COMMENT (Assigner Only)
+// CREATE COMMENT (Assigner & Assignee Allowed)
 exports.createComment = async (req, res) => {
   try {
     const { ticketId, text } = req.body;
@@ -10,9 +10,13 @@ exports.createComment = async (req, res) => {
     const ticket = await Ticket.findById(ticketId);
     if (!ticket) return res.status(404).json({ message: "Ticket not found" });
 
-    // Verify the logged-in user is the one who created/assigned the ticket
-    if (ticket.createdBy.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: "Only the assigner can add comments." });
+    const currentUserId = req.user._id.toString();
+    const creatorId = ticket.createdBy.toString();
+    const assigneeId = ticket.assignedTo ? ticket.assignedTo.toString() : null;
+
+    // ✅ NEW LOGIC: Allow if user is the creator OR the assignee
+    if (currentUserId !== creatorId && currentUserId !== assigneeId) {
+      return res.status(403).json({ message: "Only involved users can add comments." });
     }
 
     const comment = await Comment.create({
@@ -28,7 +32,7 @@ exports.createComment = async (req, res) => {
   }
 };
 
-// GET COMMENTS (Visible to Assigner and Assignee)
+// GET COMMENTS (Visible to Involved Users)
 exports.getComments = async (req, res) => {
   try {
     const ticket = await Ticket.findById(req.params.ticketId);
@@ -38,16 +42,12 @@ exports.getComments = async (req, res) => {
     const creatorId = ticket.createdBy.toString();
     const assignedToId = ticket.assignedTo ? ticket.assignedTo.toString() : null;
 
-    // Terminal debugging - check your server logs!
-    console.log(`Checking access for: ${loggedInUserId}`);
-    console.log(`Creator: ${creatorId} | Assignee: ${assignedToId}`);
-
     const isCreator = creatorId === loggedInUserId;
     const isAssigned = assignedToId === loggedInUserId;
 
     if (!isCreator && !isAssigned) {
       return res.status(403).json({ 
-        message: "Access Denied: You are not the assigner or the assignee of this ticket." 
+        message: "Access Denied: You are not involved with this ticket." 
       });
     }
 
