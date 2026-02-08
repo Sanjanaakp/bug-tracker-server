@@ -16,13 +16,13 @@ export default function Dashboard() {
   const fetchData = async () => {
     try {
       // Fetch User Profile for the header
-      const profile = await axios.get("http://localhost:5000/api/users/me", {
+      const profile = await axios.get("http://bug-tracker-api-1uut.onrender.com/api/users/me", {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUser(profile.data);
 
       // Fetch Projects where user is a member
-      const res = await axios.get("http://localhost:5000/api/projects", {
+      const res = await axios.get("http://bug-tracker-api-1uut.onrender.com/api/projects", {
         headers: { Authorization: `Bearer ${token}` }
       });
       setProjects(res.data);

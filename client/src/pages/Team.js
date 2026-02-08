@@ -16,7 +16,7 @@ export default function Team() {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/users", {
+      const res = await axios.get("http://bug-tracker-api-1uut.onrender.com/api/users", {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUsers(res.data);
