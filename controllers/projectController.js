@@ -88,3 +88,28 @@ exports.deleteProject = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+// ================= UPDATE PROJECT (OWNER ONLY) =================
+exports.updateProject = async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    // Authorization check: Only the original creator (owner) can edit
+    if (project.owner.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Only owners can edit projects" });
+    }
+
+    project.name = req.body.name || project.name;
+    project.description = req.body.description || project.description;
+    
+    await project.save();
+    res.json(project);
+  } catch (err) {
+    console.error("Project Update Error:", err);
+    res.status(500).json({ message: err.message });
+  }
+};

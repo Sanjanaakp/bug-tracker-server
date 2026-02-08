@@ -16,8 +16,8 @@ router.post("/", protect, createTicket);
 router.get("/project/:projectId", protect, getTicketsByProject);
 router.get("/my", protect, getMyTickets);
 router.put("/:id/status", protect, updateTicketStatus);
-router.put("/:id", protect, updateTicket); // ✅ Matches axios.put
-router.delete("/:id", protect, deleteTicket); // ✅ Matches axios.delete
+router.put("/:id", protect, updateTicket);
+router.delete("/:id", protect, deleteTicket);
 router.get("/:id", protect, getSingleTicket);
 
 module.exports = router;

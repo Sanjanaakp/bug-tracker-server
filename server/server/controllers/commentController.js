@@ -1,34 +1,18 @@
 const Comment = require("../models/Comment");
 const Ticket = require("../models/Ticket");
 
-<<<<<<< HEAD
-// CREATE COMMENT (Assigner & Assignee Allowed)
-=======
 // CREATE COMMENT (Assigner Only)
-// server/controllers/commentController.js
->>>>>>> 9ed9fba (Finalizing all frontend and backend fixes for deployment)
 exports.createComment = async (req, res) => {
   try {
     const { ticketId, text } = req.body;
+    if (!text) return res.status(400).json({ message: "Comment text is required" });
+
     const ticket = await Ticket.findById(ticketId);
     if (!ticket) return res.status(404).json({ message: "Ticket not found" });
 
-<<<<<<< HEAD
-    const currentUserId = req.user._id.toString();
-    const creatorId = ticket.createdBy.toString();
-    const assigneeId = ticket.assignedTo ? ticket.assignedTo.toString() : null;
-
-    // ✅ NEW LOGIC: Allow if user is the creator OR the assignee
-    if (currentUserId !== creatorId && currentUserId !== assigneeId) {
-      return res.status(403).json({ message: "Only involved users can add comments." });
-=======
-    // ✅ FIX: Ensure both IDs are converted to strings for the comparison
-    const ticketCreatorId = ticket.createdBy.toString();
-    const currentUserId = req.user._id.toString();
-
-    if (ticketCreatorId !== currentUserId) {
+    // Verify the logged-in user is the one who created/assigned the ticket
+    if (ticket.createdBy.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: "Only the assigner can add comments." });
->>>>>>> 9ed9fba (Finalizing all frontend and backend fixes for deployment)
     }
 
     const comment = await Comment.create({
@@ -44,7 +28,7 @@ exports.createComment = async (req, res) => {
   }
 };
 
-// GET COMMENTS (Visible to Involved Users)
+// GET COMMENTS (Visible to Assigner and Assignee)
 exports.getComments = async (req, res) => {
   try {
     const ticket = await Ticket.findById(req.params.ticketId);
@@ -54,12 +38,16 @@ exports.getComments = async (req, res) => {
     const creatorId = ticket.createdBy.toString();
     const assignedToId = ticket.assignedTo ? ticket.assignedTo.toString() : null;
 
+    // Terminal debugging - check your server logs!
+    console.log(`Checking access for: ${loggedInUserId}`);
+    console.log(`Creator: ${creatorId} | Assignee: ${assignedToId}`);
+
     const isCreator = creatorId === loggedInUserId;
     const isAssigned = assignedToId === loggedInUserId;
 
     if (!isCreator && !isAssigned) {
       return res.status(403).json({ 
-        message: "Access Denied: You are not involved with this ticket." 
+        message: "Access Denied: You are not the assigner or the assignee of this ticket." 
       });
     }
 
