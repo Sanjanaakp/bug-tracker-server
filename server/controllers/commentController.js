@@ -1,7 +1,7 @@
 const Comment = require("../models/Comment");
 const Ticket = require("../models/Ticket");
 
-// CREATE COMMENT (Assigner & Assignee Allowed)
+
 exports.createComment = async (req, res) => {
   try {
     const { ticketId, text } = req.body;
@@ -14,7 +14,6 @@ exports.createComment = async (req, res) => {
     const creatorId = ticket.createdBy.toString();
     const assigneeId = ticket.assignedTo ? ticket.assignedTo.toString() : null;
 
-    // ✅ NEW LOGIC: Allow if user is the creator OR the assignee
     if (currentUserId !== creatorId && currentUserId !== assigneeId) {
       return res.status(403).json({ message: "Only involved users can add comments." });
     }
@@ -32,7 +31,7 @@ exports.createComment = async (req, res) => {
   }
 };
 
-// GET COMMENTS (Visible to Involved Users)
+
 exports.getComments = async (req, res) => {
   try {
     const ticket = await Ticket.findById(req.params.ticketId);

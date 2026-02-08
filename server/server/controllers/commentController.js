@@ -1,7 +1,7 @@
 const Comment = require("../models/Comment");
 const Ticket = require("../models/Ticket");
 
-// CREATE COMMENT (Assigner Only)
+
 exports.createComment = async (req, res) => {
   try {
     const { ticketId, text } = req.body;
@@ -10,7 +10,7 @@ exports.createComment = async (req, res) => {
     const ticket = await Ticket.findById(ticketId);
     if (!ticket) return res.status(404).json({ message: "Ticket not found" });
 
-    // Verify the logged-in user is the one who created/assigned the ticket
+    
     if (ticket.createdBy.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: "Only the assigner can add comments." });
     }
@@ -28,7 +28,7 @@ exports.createComment = async (req, res) => {
   }
 };
 
-// GET COMMENTS (Visible to Assigner and Assignee)
+
 exports.getComments = async (req, res) => {
   try {
     const ticket = await Ticket.findById(req.params.ticketId);
@@ -38,7 +38,7 @@ exports.getComments = async (req, res) => {
     const creatorId = ticket.createdBy.toString();
     const assignedToId = ticket.assignedTo ? ticket.assignedTo.toString() : null;
 
-    // Terminal debugging - check your server logs!
+    
     console.log(`Checking access for: ${loggedInUserId}`);
     console.log(`Creator: ${creatorId} | Assignee: ${assignedToId}`);
 
