@@ -47,9 +47,9 @@ export default function Dashboard() {
         </div>
         
         <div style={actionArea}>
-          <button onClick={() => navigate("/settings")} style={settingsBtn}>
+          {/*<button onClick={() => navigate("/settings")} style={settingsBtn}>
             ⚙️ Settings
-          </button>
+          </button>*/}
           <button onClick={handleLogout} style={logoutBtn}>
             Logout
           </button>

@@ -11,71 +11,56 @@ export default function TicketDetails() {
 
   const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user"));
+  const API_BASE = "https://bug-tracker-api-1uut.onrender.com/api";
 
-  // ✅ SEPARATE FETCH COMMENTS FUNCTION
   const fetchComments = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/comments/${id}`, {
+      const res = await axios.get(`${API_BASE}/comments/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setComments(res.data);
     } catch (err) {
-      // If you see this in the console, the backend is blocking the assignee
-      console.error("Comment Authorization Error:", err.response?.data?.message);
+      console.error("Comment Fetch Error:", err.response?.data?.message);
     }
   };
 
-  // ✅ UPDATED USEEFFECT
   useEffect(() => {
     const loadPageData = async () => {
       try {
-        // Fetch ticket first to check permissions
-        const tRes = await axios.get(`http://localhost:5000/api/tickets/${id}`, {
+        const tRes = await axios.get(`${API_BASE}/tickets/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setTicket(tRes.data);
-
-        // Fetch comments using the reusable function
         await fetchComments();
-        
       } catch (err) {
         console.error("Access denied or ticket not found");
       } finally {
         setLoading(false);
       }
     };
-
     if (id && token) loadPageData();
   }, [id, token]);
 
   const addComment = async () => {
     if (!text.trim()) return;
     try {
-      await axios.post("http://localhost:5000/api/comments", 
+      await axios.post(`${API_BASE}/comments`, 
         { ticketId: id, text },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setText("");
-      
-      // Refresh comments using the reusable function
       await fetchComments();
-
     } catch (err) {
-      alert("Only the assigner (creator) can comment on this ticket.");
+      // ✅ Updated error message to reflect that permissions have changed
+      alert(err.response?.data?.message || "Failed to post comment.");
     }
   };
 
   if (loading) return <div style={{ padding: "50px" }}>Loading ticket details...</div>;
   if (!ticket) return <div style={{ padding: "50px" }}>Ticket not found.</div>;
 
-  // ✅ ROBUST CHECK: Convert both to strings to ensure match
-  const isCreator = user && ticket.createdBy && (
-    String(ticket.createdBy._id || ticket.createdBy) === String(user._id)
-  );
-
   return (
     <div style={{ padding: "40px", maxWidth: "800px", margin: "auto" }}>
-      {/* TICKET INFO HEADER */}
       <div style={{ border: "1px solid #ddd", padding: "20px", borderRadius: "8px", background: "#fff" }}>
         <h1 style={{ marginTop: 0 }}>{ticket.title}</h1>
         <div style={{ display: "flex", gap: "20px", borderTop: "1px solid #eee", paddingTop: "15px" }}>
@@ -88,29 +73,22 @@ export default function TicketDetails() {
       <div style={{ marginTop: "40px" }}>
         <h3>Discussion Thread</h3>
         
-        {/* ACTION AREA: Input for Creator vs Read-only for Assignee */}
-        {isCreator ? (
-          <div style={{ marginBottom: "20px" }}>
-            <textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="Assigner: Write instructions or feedback here..."
-              style={{ width: "100%", height: "100px", padding: "10px", borderRadius: "5px", border: "1px solid #ccc" }}
-            />
-            <button 
-              onClick={addComment} 
-              style={{ marginTop: "10px", padding: "10px 20px", background: "#2563eb", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}
-            >
-              Post Comment
-            </button>
-          </div>
-        ) : (
-          <p style={{ color: "#777", background: "#f8f9fa", padding: "10px", borderRadius: "5px" }}>
-            <i>Discussion is read-only for assignees. Only the assigner can add comments.</i>
-          </p>
-        )}
+        {/* ✅ REMOVED the isCreator check so the form shows for everyone */}
+        <div style={{ marginBottom: "20px" }}>
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Write a comment or update..."
+            style={{ width: "100%", height: "100px", padding: "10px", borderRadius: "5px", border: "1px solid #ccc" }}
+          />
+          <button 
+            onClick={addComment} 
+            style={{ marginTop: "10px", padding: "10px 20px", background: "#2563eb", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}
+          >
+            Post Comment
+          </button>
+        </div>
 
-        {/* COMMENTS LIST AREA */}
         <div style={{ marginTop: "20px" }}>
           {comments && comments.length > 0 ? (
             comments.map((c) => (
